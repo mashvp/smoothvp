@@ -1,5 +1,5 @@
 {
-  "name": "smoothvp",
+  "name": "@mashvp/smoothvp",
   "version": "0.1.0",
   "description": "Scroll inertia smoothing",
   "main": "dist/smoothvp.js",
@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/mashvp/smoothvp/#readme",
   "scripts": {
-    "build": "parcel build -d dist/ src/index.js -o smoothvp.js"
+    "build": "parcel build -d dist/ src/index.js -o smoothvp.js",
+    "watch": "parcel -d dist/ src/index.js -o smoothvp.js"
   },
   "dependencies": {
     "tornis": "^0.1.5"
