@@ -1,0 +1,13 @@
+{
+  "name": "smoothvp",
+  "version": "0.1.0",
+  "description": "Scroll inertia smoothing",
+  "main": "index.js",
+  "repository": "https://github.com/mashvp/smoothvp",
+  "author": "Mashvp",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "tornis": "^0.1.5"
+  }
+}
