@@ -2,12 +2,34 @@
   "name": "smoothvp",
   "version": "0.1.0",
   "description": "Scroll inertia smoothing",
-  "main": "index.js",
+  "main": "dist/smoothvp.js",
   "repository": "https://github.com/mashvp/smoothvp",
   "author": "Mashvp",
   "license": "MIT",
   "private": false,
+  "keywords": [
+    "scroll",
+    "smooth",
+    "inertia"
+  ],
+  "bugs": {
+    "url": "https://github.com/mashvp/smoothvp/issues"
+  },
+  "homepage": "https://github.com/mashvp/smoothvp/#readme",
+  "scripts": {
+    "build": "parcel build -d dist/ src/index.js -o smoothvp.js"
+  },
   "dependencies": {
     "tornis": "^0.1.5"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.5.0",
+    "@babel/core": "^7.5.4",
+    "@babel/preset-env": "^7.5.4",
+    "babel-eslint": "^10.0.2",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.18.0",
+    "parcel-bundler": "^1.12.3"
   }
 }
