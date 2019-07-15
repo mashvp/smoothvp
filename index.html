@@ -48,6 +48,14 @@
       font-weight: lighter;
     }
 
+    #display {
+      position: fixed;
+      display: inline-block;
+      top: 0;
+      left: 0;
+      padding: 1rem;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -100,6 +108,11 @@
 </head>
 
 <body>
+  <div id="display">
+    <span>Current scroll:</span>
+    <span id="count">0</span><span>px</span>
+  </div>
+
   <div id="wrapper">
     <main id="content">
       <h1>Smoothvp</h1>
@@ -145,11 +158,18 @@
   <script>
     ((Smoothvp) => {
       const init = () => {
+        const count = document.getElementById('count');
+
         const container = document.getElementById('wrapper');
         const content = document.getElementById('content');
 
         const smoothvp = Smoothvp(container, content);
         smoothvp.smooth({ duration: 700 });
+        smoothvp.addEventListener('update', event => {
+          const top = event.top;
+
+          count.textContent = top;
+        });
       };
 
       document.addEventListener('DOMContentLoaded', init);

@@ -80,6 +80,30 @@ Smoothvp provides builtin easing helpers, available under `Smoothvp.Easing`.
 | EASE_OUT_EXPO  | cubic-bezier(0.19, 1, 0.22, 1)          |
 | EASE_OUT_BACK  | cubic-bezier(0.175, 0.885, 0.32, 1.275) |
 
+## Events
+
+You can listen to the `update` event to get the scroll position on every update.
+
+```js
+import Smoothvp from '@mashvp/smoothvp';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('container');
+  const content = document.getElementById('content');
+
+  const smoothvp = Smoothvp(container, content);
+  smoothvp.smooth();
+
+  smoothvp.addEventListener('update', event => {
+    const { top } = event;
+
+    console.log(top);
+  });
+});
+```
+
+You can also use `removeEventListener` like on any HTML element.
+
 ## Credits
 
 - [Robb Owen](https://github.com/robb0wen) and his awesome library [Tornis](https://github.com/robb0wen/tornis).

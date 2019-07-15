@@ -14,5 +14,6 @@ module.exports = {
   },
   rules: {
     'no-param-reassign': [0],
+    'consistent-return': [0],
   },
 };

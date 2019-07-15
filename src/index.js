@@ -1,4 +1,5 @@
 import { watchViewport, unwatchViewport } from 'tornis';
+
 import { later } from './utils';
 
 export const Easing = {
@@ -13,42 +14,82 @@ export const Easing = {
 };
 
 const Smoothvp = (container, content) => {
-  let hitbox;
+  const handlers = { update: [] };
+  let spacer;
+
+  const addEventListener = (event, handler) => {
+    if (!Object.prototype.hasOwnProperty.call(handlers, event)) {
+      throw new Error(`Event '${event}' is not supported`);
+    }
+
+    handlers[event].push(handler);
+  };
+
+  const removeEventListener = (event, handler) => {
+    if (!Object.prototype.hasOwnProperty.call(handlers, event)) {
+      throw new Error(`Event '${event}' is not supported`);
+    }
+
+    const index = handlers[event].indexOf(handler);
+    if (index !== -1) {
+      handlers[event].splice(index, 1);
+    }
+  };
+
+  const dispatch = event => handlers[event.type].forEach(handler => handler(event));
 
   const getTranslation = y => `translate3D(0, ${-y}px, 0)`;
 
-  const createHitbox = (height) => {
-    hitbox = document.createElement('div');
+  const createSpacer = (height) => {
+    spacer = document.createElement('div');
 
-    hitbox.classList.add('smoothvp-hitbox');
-    hitbox.style.height = `${height}px`;
+    spacer.classList.add('smoothvp-spacer');
+    spacer.style.height = `${height}px`;
 
-    container.parentElement.appendChild(hitbox);
+    container.parentElement.appendChild(spacer);
   };
 
   const handleViewportUpdate = ({ scroll, size }) => {
     if (scroll.changed) {
+      const event = new Event('update');
       const { top } = scroll;
 
       content.style.transform = getTranslation(top);
+      event.top = top;
+
+      dispatch(event);
     }
 
     if (size.changed) {
-      const { width } = hitbox.getBoundingClientRect();
+      const { width } = spacer.getBoundingClientRect();
       const y = content.offsetHeight;
 
-      hitbox.style.height = `${y}px`;
+      spacer.style.height = `${y}px`;
       container.style.width = `${width}px`;
     }
   };
 
+  const applyTabFix = () => {
+    document.addEventListener('keydown', (event) => {
+      const key = event.code || event.which;
+
+      if (key === 9 || key === 'Tab') {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
+    });
+  };
+
   const smooth = ({ duration = 500, timingFunction = Easing.EASE_OUT_QUINT }) => {
+    applyTabFix();
+
     later(() => {
       const { width } = container.getBoundingClientRect();
       const { height } = content.getBoundingClientRect();
       const { scrollY } = window;
 
-      createHitbox(height);
+      createSpacer(height);
 
       container.style.overflow = 'hidden';
       container.style.position = 'fixed';
@@ -56,9 +97,12 @@ const Smoothvp = (container, content) => {
       container.style.width = `${width}px`;
 
       content.style.transform = getTranslation(scrollY);
-      later(() => {
-        content.style.transition = `transform ${duration}ms ${timingFunction}`;
-      }, scrollY !== 0 ? 10 : 0);
+      later(
+        () => {
+          content.style.transition = `transform ${duration}ms ${timingFunction}`;
+        },
+        scrollY !== 0 ? 10 : 0,
+      );
 
       watchViewport(handleViewportUpdate);
     });
@@ -66,7 +110,7 @@ const Smoothvp = (container, content) => {
 
   const unsmooth = () => {
     later(() => {
-      hitbox.parentElement.removeChild(hitbox);
+      spacer.parentElement.removeChild(spacer);
 
       container.style.overflow = '';
       container.style.position = '';
@@ -80,7 +124,12 @@ const Smoothvp = (container, content) => {
     });
   };
 
-  return { smooth, unsmooth };
+  return {
+    smooth,
+    unsmooth,
+    addEventListener,
+    removeEventListener,
+  };
 };
 
 Smoothvp.Easing = {
