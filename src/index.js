@@ -13,7 +13,7 @@ export const Easing = {
   EASE_OUT_BACK: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
 };
 
-const Smoothvp = (container, content) => {
+const Smoothvp = (container, content, { direction = 'vertical' } = {}) => {
   const handlers = { update: [] };
   let spacer;
 
@@ -38,7 +38,13 @@ const Smoothvp = (container, content) => {
 
   const dispatch = event => handlers[event.type].forEach(handler => handler(event));
 
-  const getTranslation = y => `translate3D(0, ${-y}px, 0)`;
+  const getTranslation = (y) => {
+    if (direction === 'horizontal') {
+      return `translate3D(${-y}px, 100vh, 0) rotate(-90deg)`;
+    }
+
+    return `translate3D(0, ${-y}px, 0)`;
+  };
 
   const createSpacer = (height) => {
     spacer = document.createElement('div');
@@ -54,17 +60,28 @@ const Smoothvp = (container, content) => {
       const event = new Event('update');
       const { top } = scroll;
 
-      content.style.transform = getTranslation(top);
-      event.top = top;
+      if (direction === 'vertical') {
+        content.style.transform = getTranslation(top);
+        event.top = top;
+      } else {
+        const { height: spacerHeight } = spacer.getBoundingClientRect();
+        const percent = top / (spacerHeight - size.y);
+        const diff = window.innerHeight - window.innerWidth;
+
+        content.style.transform = getTranslation(top + diff * percent);
+        event.top = top;
+      }
 
       dispatch(event);
     }
 
     if (size.changed) {
       const { width } = spacer.getBoundingClientRect();
-      const y = content.offsetHeight;
+      const { width: x, height: y } = content.getBoundingClientRect();
 
-      spacer.style.height = `${y}px`;
+      const spacerSize = direction === 'vertical' ? y : x;
+
+      spacer.style.height = `${spacerSize}px`;
       container.style.width = `${width}px`;
     }
   };
@@ -85,24 +102,34 @@ const Smoothvp = (container, content) => {
     applyTabFix();
 
     later(() => {
-      const { width } = container.getBoundingClientRect();
-      const { height } = content.getBoundingClientRect();
+      const { height: contentHeight, width: contentWidth } = content.getBoundingClientRect();
       const { scrollY } = window;
 
-      createSpacer(height);
+      createSpacer(direction === 'vertical' ? contentHeight : contentWidth);
 
       container.style.overflow = 'hidden';
       container.style.position = 'fixed';
-      container.style.height = '100vh';
-      container.style.width = `${width}px`;
+      container.style.height = direction === 'vertical' ? '100vh' : `${contentHeight}px`;
+      container.style.width = direction === 'vertical' ? `${contentWidth}px` : '';
+
+      if (direction === 'horizontal') {
+        content.style.transformOrigin = 'left top';
+        content.style.width = '100vh';
+
+        const children = Array.from(content.querySelectorAll('*'));
+
+        children.forEach((child) => {
+          if (child.classList.contains('smoothvp-rotate')) {
+            child.style.transformOrigin = 'center';
+            child.style.transform = 'rotate(90deg)';
+          }
+        });
+      }
 
       content.style.transform = getTranslation(scrollY);
-      later(
-        () => {
-          content.style.transition = `transform ${duration}ms ${timingFunction}`;
-        },
-        scrollY !== 0 ? 10 : 0,
-      );
+      later(() => {
+        content.style.transition = `transform ${duration}ms ${timingFunction}`;
+      }, 10);
 
       watchViewport(handleViewportUpdate);
     });
