@@ -99,6 +99,11 @@ const Smoothvp = (container, content, { direction = 'vertical' } = {}) => {
   };
 
   const smooth = ({ duration = 500, timingFunction = Easing.EASE_OUT_QUINT }) => {
+    if (
+      typeof window.orientation !== typeof undefined
+      || navigator.userAgent.indexOf('IEMobile') !== -1
+    ) return;
+
     applyTabFix();
 
     later(() => {
@@ -136,6 +141,11 @@ const Smoothvp = (container, content, { direction = 'vertical' } = {}) => {
   };
 
   const unsmooth = () => {
+    if (
+      typeof window.orientation !== typeof undefined
+      || navigator.userAgent.indexOf('IEMobile') !== -1
+    ) return;
+
     later(() => {
       spacer.parentElement.removeChild(spacer);
 
