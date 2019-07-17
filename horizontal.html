@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Smoothvp horizontal demo</title>
+  <style>
+    html,
+    body {
+      position: relative;
+      width: 100vw;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      box-sizing: border-box;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: inherit;
+    }
+
+    #content {
+      display: block;
+      position: relative;
+      margin: 0;
+      padding: 4rem;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 3rem;
+      font-size: 3rem;
+      font-weight: lighter;
+    }
+
+    #display {
+      position: fixed;
+      display: inline-block;
+      top: 0;
+      left: 0;
+      padding: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 5vmin;
+    }
+
+    .box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      outline: 1px solid rgba(0, 0, 0, 0.25);
+      padding-top: 100%;
+    }
+
+    .box::before,
+    .box::after {
+      content: '';
+      position: absolute;
+      display: block;
+      width: 141.4214%;
+      height: 1px;
+
+      background-color: rgba(0, 0, 0, 0.25);
+    }
+
+    .box::before {
+      top: 0;
+      left: 0;
+      transform-origin: left;
+      transform: rotate(45deg);
+    }
+
+    .box::after {
+      top: 0;
+      right: 0;
+      transform-origin: right;
+      transform: rotate(-45deg);
+    }
+
+    .box span {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+
+    footer {
+      display: block;
+      position: relative;
+      padding-top: 40px;
+      text-align: left;
+    }
+
+    footer a {
+      color: black;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="display">
+    <span>Current scroll:</span>
+    <span id="count">0</span><span>px</span>
+  </div>
+
+  <div id="wrapper">
+    <main id="content">
+      <h1>Smoothvp</h1>
+      <section class="grid">
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box">
+          <span>This one is</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+        <div class="box smoothvp-rotate">
+          <span>Content is not sideways</span>
+        </div>
+      </section>
+      <footer>
+        <a href="https://mashvp.com" target="_blank" rel="noopener noreferrer">Mashvp</a>
+      </footer>
+    </main>
+  </div>
+
+  <script src="./dist/smoothvp.js"></script>
+  <script>
+    ((Smoothvp) => {
+      const init = () => {
+        const count = document.getElementById('count');
+
+        const container = document.getElementById('wrapper');
+        const content = document.getElementById('content');
+
+        const smoothvp = Smoothvp(container, content, { direction: 'horizontal' });
+        smoothvp.smooth({ duration: 700 });
+        smoothvp.addEventListener('update', event => {
+          const top = event.top;
+
+          count.textContent = top;
+        });
+      };
+
+      document.addEventListener('DOMContentLoaded', init);
+    })(window.Smoothvp);
+  </script>
+</body>
+
+</html>
