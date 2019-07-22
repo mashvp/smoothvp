@@ -1,21 +1,20 @@
 import { watchViewport, unwatchViewport } from 'tornis';
 
-import { later } from './utils';
+import { Easing, Direction, Position } from './constants';
+import {
+  css,
+  getPageOffset,
+  horizontalToVertical,
+  isChildOf,
+  later,
+  next,
+  verticalToHorizontal,
+} from './utils';
 
-export const Easing = {
-  EASE_OUT_SINE: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-  EASE_OUT_CUBIC: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
-  EASE_OUT_QUINT: 'cubic-bezier(0.23, 1, 0.32, 1)',
-  EASE_OUT_CIRC: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
-  EASE_OUT_QUAD: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-  EASE_OUT_QUART: 'cubic-bezier(0.165, 0.84, 0.44, 1)',
-  EASE_OUT_EXPO: 'cubic-bezier(0.19, 1, 0.22, 1)',
-  EASE_OUT_BACK: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-};
-
-const Smoothvp = (container, content, { direction = 'vertical' } = {}) => {
+const Smoothvp = (container, content, { direction = Direction.VERTICAL } = {}) => {
   const handlers = { update: [] };
   let spacer;
+  let stylesheet;
 
   const addEventListener = (event, handler) => {
     if (!Object.prototype.hasOwnProperty.call(handlers, event)) {
@@ -39,11 +38,13 @@ const Smoothvp = (container, content, { direction = 'vertical' } = {}) => {
   const dispatch = event => handlers[event.type].forEach(handler => handler(event));
 
   const getTranslation = (y) => {
-    if (direction === 'horizontal') {
-      return `translate3D(${-y}px, 100vh, 0) rotate(-90deg)`;
+    const rounded = Math.floor(y);
+
+    if (direction === Direction.HORIZONTAL) {
+      return `translate3D(${-rounded}px, 100vh, 0) rotate(-90deg)`;
     }
 
-    return `translate3D(0, ${-y}px, 0)`;
+    return `translate3D(0, ${-rounded}px, 0)`;
   };
 
   const createSpacer = (height) => {
@@ -55,47 +56,137 @@ const Smoothvp = (container, content, { direction = 'vertical' } = {}) => {
     container.parentElement.appendChild(spacer);
   };
 
+  const scrollToElement = (target, options = { offset: undefined, position: Position.CENTER }) => {
+    const { offset, position } = options;
+
+    if (isChildOf(target, content)) {
+      if (direction === Direction.VERTICAL) {
+        const { top, centerTop, bottomTop } = getPageOffset(target);
+        const basePosition = ((pos) => {
+          switch (pos) {
+            case Position.TOP:
+              return top;
+            case Position.CENTER:
+              return centerTop;
+            case Position.BOTTOM:
+              return bottomTop;
+            default:
+              return centerTop;
+          }
+        })(position);
+
+        if (typeof offset === typeof undefined) {
+          window.scrollTo(0, basePosition);
+        } else {
+          window.scrollTo(0, basePosition + offset);
+        }
+      } else {
+        const hToVOffset = horizontalToVertical({
+          ...options,
+          spacer,
+          content,
+          target,
+        });
+
+        window.scrollTo(0, hToVOffset);
+      }
+    }
+  };
+
+  const scrollToPosition = offset => window.scrollTo(0, offset);
+
+  const scrollTo = (
+    targetOrPosition,
+    options = { offset: undefined, position: Position.CENTER },
+  ) => {
+    if (targetOrPosition instanceof HTMLElement) {
+      return scrollToElement(targetOrPosition, options);
+    }
+
+    scrollToPosition(targetOrPosition);
+  };
+
   const handleViewportUpdate = ({ scroll, size }) => {
+    if (size.changed) {
+      const { width } = spacer.getBoundingClientRect();
+      const { width: x, height: y } = content.getBoundingClientRect();
+
+      const spacerSize = direction === Direction.VERTICAL ? y : x;
+
+      spacer.style.height = `${spacerSize}px`;
+      container.style.width = `${width}px`;
+
+      if (direction === Direction.HORIZONTAL) {
+        container.style.height = `${y}px`;
+      }
+    }
+
     if (scroll.changed) {
       const event = new Event('update');
       const { top } = scroll;
 
-      if (direction === 'vertical') {
+      if (direction === Direction.VERTICAL) {
         content.style.transform = getTranslation(top);
         event.top = top;
       } else {
-        const { height: spacerHeight } = spacer.getBoundingClientRect();
-        const percent = top / (spacerHeight - size.y);
-        const diff = window.innerHeight - window.innerWidth;
+        const vToHOffset = verticalToHorizontal({
+          spacer,
+          top,
+          size,
+        });
 
-        content.style.transform = getTranslation(top + diff * percent);
+        content.style.transform = getTranslation(vToHOffset);
         event.top = top;
       }
 
       dispatch(event);
     }
+  };
 
-    if (size.changed) {
-      const { width } = spacer.getBoundingClientRect();
-      const { width: x, height: y } = content.getBoundingClientRect();
+  const handleKeyboardEvent = (event) => {
+    const key = event.code || event.which;
 
-      const spacerSize = direction === 'vertical' ? y : x;
-
-      spacer.style.height = `${spacerSize}px`;
-      container.style.width = `${width}px`;
+    if (key === 9 || key === 'Tab') {
+      next(() => scrollToElement(document.activeElement));
     }
   };
 
-  const applyTabFix = () => {
-    document.addEventListener('keydown', (event) => {
-      const key = event.code || event.which;
+  const applyKeyboardHandler = () => {
+    document.addEventListener('keydown', handleKeyboardEvent);
+  };
 
-      if (key === 9 || key === 'Tab') {
-        event.preventDefault();
-        event.stopPropagation();
-        return false;
+  const removeKeyboardHandler = () => {
+    document.removeEventListener('keydown', handleKeyboardEvent);
+  };
+
+  const installStylesheet = () => {
+    stylesheet = css`
+      html,
+      body,
+      .smoothvp-container {
+        overscroll-behavior: none;
       }
-    });
+
+      .smoothvp-container {
+        overflow: visible;
+        position: fixed;
+        top: 0;
+      }
+
+      .smoothvp-content.smoothvp-horizontal {
+        width: 100vh;
+        transform-origin: left top;
+      }
+
+      .smoothvp-content.smoothvp-horizontal .smoothvp-rotate {
+        transform-origin: center center;
+        transform: rotate(90deg);
+      }
+    `;
+  };
+
+  const uninstallStylesheet = () => {
+    stylesheet.uninstall();
   };
 
   const smooth = ({ duration = 500, timingFunction = Easing.EASE_OUT_QUINT }) => {
@@ -104,34 +195,23 @@ const Smoothvp = (container, content, { direction = 'vertical' } = {}) => {
       || navigator.userAgent.indexOf('IEMobile') !== -1
     ) return;
 
-    applyTabFix();
+    installStylesheet();
+    applyKeyboardHandler();
 
     later(() => {
       const { height: contentHeight, width: contentWidth } = content.getBoundingClientRect();
       const { scrollY } = window;
 
-      createSpacer(direction === 'vertical' ? contentHeight : contentWidth);
+      createSpacer(direction === Direction.VERTICAL ? contentHeight : contentWidth);
 
-      container.style.overflow = 'hidden';
-      container.style.position = 'fixed';
-      container.style.height = direction === 'vertical' ? '100vh' : `${contentHeight}px`;
-      container.style.width = direction === 'vertical' ? `${contentWidth}px` : '';
+      container.classList.add('smoothvp-container');
+      container.style.height = direction === Direction.VERTICAL ? '100vh' : `${contentHeight}px`;
+      container.style.width = direction === Direction.VERTICAL ? `${contentWidth}px` : '';
 
-      if (direction === 'horizontal') {
-        content.style.transformOrigin = 'left top';
-        content.style.width = '100vh';
-
-        const children = Array.from(content.querySelectorAll('*'));
-
-        children.forEach((child) => {
-          if (child.classList.contains('smoothvp-rotate')) {
-            child.style.transformOrigin = 'center';
-            child.style.transform = 'rotate(90deg)';
-          }
-        });
-      }
-
+      content.classList.add('smoothvp-content');
+      content.classList.add(`smoothvp-${direction}`);
       content.style.transform = getTranslation(scrollY);
+
       later(() => {
         content.style.transition = `transform ${duration}ms ${timingFunction}`;
       }, 10);
@@ -146,16 +226,19 @@ const Smoothvp = (container, content, { direction = 'vertical' } = {}) => {
       || navigator.userAgent.indexOf('IEMobile') !== -1
     ) return;
 
+    uninstallStylesheet();
+    removeKeyboardHandler();
+
     later(() => {
       spacer.parentElement.removeChild(spacer);
 
-      container.style.overflow = '';
-      container.style.position = '';
+      container.classList.remove('smoothvp-container');
       container.style.height = '';
       container.style.width = '';
 
-      content.style.transform = '';
+      content.classList.remove('smoothvp-content', `smoothvp-${direction}`);
       content.style.transition = '';
+      content.style.transform = '';
 
       unwatchViewport(handleViewportUpdate);
     });
@@ -164,21 +247,15 @@ const Smoothvp = (container, content, { direction = 'vertical' } = {}) => {
   return {
     smooth,
     unsmooth,
+    scrollTo,
     addEventListener,
     removeEventListener,
   };
 };
 
-Smoothvp.Easing = {
-  EASE_OUT_SINE: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-  EASE_OUT_CUBIC: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
-  EASE_OUT_QUINT: 'cubic-bezier(0.23, 1, 0.32, 1)',
-  EASE_OUT_CIRC: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
-  EASE_OUT_QUAD: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-  EASE_OUT_QUART: 'cubic-bezier(0.165, 0.84, 0.44, 1)',
-  EASE_OUT_EXPO: 'cubic-bezier(0.19, 1, 0.22, 1)',
-  EASE_OUT_BACK: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-};
+Smoothvp.Easing = Easing;
+Smoothvp.Direction = Direction;
+Smoothvp.Position = Position;
 
 window.Smoothvp = Smoothvp;
 export default Smoothvp;

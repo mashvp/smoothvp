@@ -11,12 +11,14 @@
     body {
       position: relative;
       width: 100vw;
+      max-width: 100vw;
       min-height: 100vh;
       margin: 0;
       padding: 0;
 
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       box-sizing: border-box;
+      overflow-x: hidden;
     }
 
     *,
@@ -145,9 +147,9 @@
         <div class="box smoothvp-rotate">
           <span>Content is not sideways</span>
         </div>
-        <div class="box smoothvp-rotate">
-          <span>Content is not sideways</span>
-        </div>
+        <a href="#" class="box smoothvp-rotate">
+          <span>This box is a link</span>
+        </a>
         <div class="box smoothvp-rotate">
           <span>Content is not sideways</span>
         </div>
@@ -187,9 +189,9 @@
         <div class="box smoothvp-rotate">
           <span>Content is not sideways</span>
         </div>
-        <div class="box smoothvp-rotate">
-          <span>Content is not sideways</span>
-        </div>
+        <a href="#" class="box smoothvp-rotate">
+          <span>This box is also a link</span>
+        </a>
         <div class="box smoothvp-rotate">
           <span>Content is not sideways</span>
         </div>
@@ -224,13 +226,15 @@
         const container = document.getElementById('wrapper');
         const content = document.getElementById('content');
 
-        const smoothvp = Smoothvp(container, content, { direction: 'horizontal' });
-        smoothvp.smooth({ duration: 700 });
+        const smoothvp = Smoothvp(container, content, { direction: Smoothvp.Direction.HORIZONTAL });
+        smoothvp.smooth({ duration: 1000 });
         smoothvp.addEventListener('update', event => {
           const top = event.top;
 
           count.textContent = top;
         });
+
+        window.app = smoothvp;
       };
 
       document.addEventListener('DOMContentLoaded', init);

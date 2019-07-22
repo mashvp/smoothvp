@@ -1,6 +1,6 @@
 {
   "name": "@mashvp/smoothvp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Scroll inertia smoothing",
   "main": "dist/smoothvp.js",
   "repository": "https://github.com/mashvp/smoothvp",

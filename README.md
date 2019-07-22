@@ -36,6 +36,8 @@ Given the HTML structure:
 </body>
 ```
 
+Use `smooth` to initialize the library on your container. Smoothvp works for both vertical and horizontal layouts.
+
 ```js
 import Smoothvp from '@mashvp/smoothvp';
 
@@ -43,7 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('container');
   const content = document.getElementById('content');
 
-  const smoothvp = Smoothvp(container, content);
+  const smoothvp = Smoothvp(container, content, {
+    direction: Smoothvp.Direction.VERTICAL,
+  });
 
   smoothvp.smooth({
     duration: 500,
@@ -51,6 +55,27 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 ```
+
+Note: As of today, the horizontal mode rotates your layout, and allows you to add the `smoothvp-rotate` class on the elements you want to rotate back. This works better with regular grid layouts, but will not work for everyone.
+
+### Smoothvp#scrollTo
+
+Use `scrollTo` to programmatically scroll to a specific point or element in your page.
+
+```js
+// Scroll to a specific point in the page
+smoothvp.scrollTo(512);
+
+// Scroll to an element (centered in viewport by default)
+const element = document.querySelector('...');
+smoothvp.scrollTo(element);
+
+// Scroll to an element, aligned to the top of the viewport, with an offset of -70.
+// The TOP and BOTTOM alignments align to the left and right in horizontal mode.
+// If your site has a floating navbar, you can use the offset value to dodge it.
+smoothvp.scrollTo(element, { position: Smoothvp.Position.TOP, offset: -70 });
+```
+
 ### Smoothvp#unsmooth
 
 Call the `unsmooth` function on your Smoothvp instance to disable smoothing.
@@ -63,9 +88,11 @@ Duration of the smoothing effect, in milliseconds. Defaults to 700ms.
 
 #### timingFunction
 
-The CSS timing function to use for the smoothing effect. Any buildin CSS function or cubic-bezier can be used.
+The CSS timing function to use for the smoothing effect. Any builtin CSS function or cubic-bezier can be used.
 
-### Included easings
+### Constants
+
+#### Easings
 
 Smoothvp provides builtin easing helpers, available under `Smoothvp.Easing`.
 
