@@ -246,8 +246,12 @@ const Smoothvp = (container, content, { direction = Direction.VERTICAL } = {}) =
 
   return {
     smooth,
+    start: smooth,
     unsmooth,
+    stop: unsmooth,
+
     scrollTo,
+
     addEventListener,
     removeEventListener,
   };

@@ -58,7 +58,7 @@ export const horizontalToVertical = ({
     }
   })(position);
 
-  const percent = (targetOffset + offset) / (spacerHeight - window.innerWidth);
+  const percent = (targetOffset + (offset || 0)) / (spacerHeight - window.innerWidth);
   const scrollTop = percent * (spacerHeight - window.innerHeight);
 
   return scrollTop;

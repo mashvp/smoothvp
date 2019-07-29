@@ -44,10 +44,18 @@
     }
 
     h1 {
+      display: flex;
+      align-items: baseline;
       margin-top: 0;
       margin-bottom: 3rem;
       font-size: 3rem;
       font-weight: lighter;
+    }
+
+    h1 a {
+      margin-left: 1rem;
+      color: currentColor;
+      font-size: 0.8rem;
     }
 
     #display {
@@ -56,6 +64,17 @@
       top: 0;
       left: 0;
       padding: 1rem;
+    }
+
+    #switch {
+      position: fixed;
+      display: inline-block;
+      top: 0;
+      right: 0;
+      padding: 1rem;
+      color: black;
+
+      z-index: 900;
     }
 
     .grid {
@@ -69,6 +88,19 @@
       position: relative;
       outline: 1px solid rgba(0, 0, 0, 0.25);
       padding-top: 100%;
+    }
+
+    a.box {
+      color: black;
+      transition: outline 0.2s;
+    }
+
+    a.box:focus {
+      outline: 5px solid black;
+    }
+
+    a.box span {
+      text-decoration: underline;
     }
 
     .box>span {
@@ -122,6 +154,8 @@
     <span id="count">0</span><span>px</span>
   </div>
 
+  <a href="/horizontal" id="switch">Horizontal layout</a>
+
   <div id="wrapper">
     <main id="content">
       <h1>Smoothvp</h1>
@@ -174,15 +208,12 @@
         const container = document.getElementById('wrapper');
         const content = document.getElementById('content');
 
-        const smoothvp = Smoothvp(container, content);
-        smoothvp.smooth({ duration: 1000 });
-        smoothvp.addEventListener('update', event => {
-          const top = event.top;
+        const smooth = Smoothvp(container, content);
 
-          count.textContent = top;
-        });
+        smooth.start({ duration: 600, timingFunction: Smoothvp.Easing.EASE_OUT_QUART });
+        smooth.addEventListener('update', event => (count.textContent = event.top));
 
-        window.app = smoothvp;
+        window.app = smooth;
       };
 
       document.addEventListener('DOMContentLoaded', init);

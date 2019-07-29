@@ -49,6 +49,17 @@
       padding: 1rem;
     }
 
+    #switch {
+      position: fixed;
+      display: inline-block;
+      top: 0;
+      right: 0;
+      padding: 1rem;
+      color: black;
+
+      z-index: 900;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -62,6 +73,19 @@
       position: relative;
       outline: 1px solid rgba(0, 0, 0, 0.25);
       padding-top: 100%;
+    }
+
+    a.box {
+      color: black;
+      transition: outline 0.2s;
+    }
+
+    a.box:focus {
+      outline: 5px solid black;
+    }
+
+    a.box span {
+      text-decoration: underline;
     }
 
     .box::before,
@@ -116,6 +140,8 @@
     <span id="count">0</span><span>px</span>
   </div>
 
+  <a href="/" id="switch">Vertical layout</a>
+
   <div id="wrapper">
     <main id="content">
       <h1>Smoothvp</h1>
@@ -163,7 +189,7 @@
           <span>Content is not sideways</span>
         </div>
         <div class="box">
-          <span>This one is</span>
+          <span>This box is sideways</span>
         </div>
         <div class="box smoothvp-rotate">
           <span>Content is not sideways</span>
@@ -226,15 +252,12 @@
         const container = document.getElementById('wrapper');
         const content = document.getElementById('content');
 
-        const smoothvp = Smoothvp(container, content, { direction: Smoothvp.Direction.HORIZONTAL });
-        smoothvp.smooth({ duration: 1000 });
-        smoothvp.addEventListener('update', event => {
-          const top = event.top;
+        const smooth = Smoothvp(container, content, { direction: Smoothvp.Direction.HORIZONTAL });
 
-          count.textContent = top;
-        });
+        smooth.start({ duration: 600, timingFunction: Smoothvp.Easing.EASE_OUT_QUART });
+        smooth.addEventListener('update', event => (count.textContent = event.top));
 
-        window.app = smoothvp;
+        window.app = smooth;
       };
 
       document.addEventListener('DOMContentLoaded', init);
